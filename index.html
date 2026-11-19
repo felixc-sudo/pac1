@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CARBONCUT | Interactive Carbon Footprint & Reduction Assessment</title>
+  <link rel="stylesheet" href="carboncut_assessment_ui.css" />
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="cc-topbar">
+    <div class="cc-container cc-nav-wrap">
+      <a href="#quiz-module" class="cc-brand">
+        <span class="cc-dot"></span> CARBONCUT
+      </a>
+      <nav class="cc-nav-links" aria-label="Main Navigation">
+        <a href="#quiz-module">Carbon Quiz (1/5)</a>
+        <a href="#emissions-tracker">Footprint Tracker</a>
+        <a href="#reduction-tasks">Reduction Checklist</a>
+        <a href="#component-theory">DOM Component Theory</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Intro -->
+  <section class="cc-hero-banner">
+    <div class="cc-container">
+      <span class="cc-tag">Carbon Footprint Tracking &amp; Reduction Services</span>
+      <h1>Interactive Sustainability Benchmark &amp; Carbon Reduction Hub</h1>
+      <p>
+        Test your organization&rsquo;s Scope 1&ndash;3 decarbonization readiness with our live 5-question quiz,
+        estimate monthly CO₂e emissions, and manage verified reduction milestones in real time.
+      </p>
+    </div>
+  </section>
+
+  <!-- Practicum Interactive Component: Question 1/5 + Progress Bar + Score + A/B/C/D Option Rows -->
+  <main id="quiz-module" class="cc-section">
+    <div class="cc-container">
+      <div class="cc-quiz-box">
+        <!-- Top HUD matching Screenshot: Question 1/5 & Progress Bar on Left, Score on Right -->
+        <div class="cc-hud-row">
+          <div class="cc-hud-left">
+            <span class="cc-hud-caption" id="qCounterText">Question 1/5</span>
+            <div class="cc-bar-outline" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="20">
+              <div class="cc-bar-fill" id="qProgressFill" style="width: 20%;"></div>
+            </div>
+          </div>
+
+          <div class="cc-hud-right">
+            <span class="cc-hud-caption">Score</span>
+            <strong class="cc-score-num" id="liveScoreText">0</strong>
+          </div>
+        </div>
+
+        <!-- Active Question Area -->
+        <div id="activeQuestionPane">
+          <h2 class="cc-question-heading" id="qTitleText">
+            Loading carbon reduction question...
+          </h2>
+
+          <div class="cc-choice-list" id="choiceButtonsHost" role="group" aria-label="Answer Options">
+            <!-- A, B, C, D tiles injected dynamically by JS -->
+          </div>
+
+          <div class="cc-quiz-footer">
+            <span id="answerHintText" class="cc-hint-msg">Choose A, B, C, or D to check your answer.</span>
+            <button type="button" class="cc-next-button" id="nextStepBtn" onclick="goNextQuestion()" disabled>
+              Next Question &rarr;
+            </button>
+          </div>
+        </div>
+
+        <!-- Final Score & Recommendation View -->
+        <div id="quizResultPane" class="cc-result-pane" hidden>
+          <span class="cc-tag">ASSESSMENT COMPLETE</span>
+          <h2>Final Carbon Readiness Score: <span id="finalPointsOut">0</span> / 500</h2>
+          <p id="verdictSummaryText"></p>
+          <div class="cc-result-btns">
+            <button type="button" class="cc-btn cc-btn-rose" onclick="saveQuizActionToList()">
+              + Add Recommended Action to Checklist
+            </button>
+            <button type="button" class="cc-btn cc-btn-light" onclick="resetQuizFlow()">
+              Restart Quiz
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Carbon Footprint Tracking Calculator -->
+  <section id="emissions-tracker" class="cc-section cc-tinted-bg">
+    <div class="cc-container">
+      <div class="cc-sec-header">
+        <h2>Carbon Footprint Tracking Calculator</h2>
+        <p>Adjust facility electricity, fleet travel, and operations to compute monthly and annual CO₂e.</p>
+      </div>
+
+      <div class="cc-calc-layout">
+        <div>
+          <div class="cc-control-group">
+            <label for="powerSlider">Monthly Grid Electricity: <strong id="powerValLabel">320</strong> kWh</label>
+            <input type="range" id="powerSlider" min="50" max="1500" value="320" oninput="recalcEmissions()" />
+          </div>
+          <div class="cc-control-group">
+            <label for="fleetSlider">Weekly Fleet / Commute Distance: <strong id="fleetValLabel">140</strong> km</label>
+            <input type="range" id="fleetSlider" min="0" max="1000" value="140" oninput="recalcEmissions()" />
+          </div>
+          <div class="cc-control-group">
+            <label for="opsTierSelect">Operations &amp; Supply Profile</label>
+            <select id="opsTierSelect" onchange="recalcEmissions()">
+              <option value="115">Low-Carbon / Solar Microgrid (115 kg CO₂e/mo)</option>
+              <option value="170" selected>Balanced Commercial Facility (170 kg CO₂e/mo)</option>
+              <option value="250">Standard Mixed Operations (250 kg CO₂e/mo)</option>
+              <option value="340">Heavy Cold-Chain Logistics (340 kg CO₂e/mo)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="cc-calc-card">
+          <span class="cc-kicker">ESTIMATED CARBON FOOTPRINT</span>
+          <div class="cc-big-readout"><span id="monthlyKgVal">528</span> <small>kg CO₂e / month</small></div>
+          <p>Annualized Footprint: <strong id="annualTonnesVal">6.34</strong> tonnes CO₂e / year</p>
+          <div id="adviceChip" class="cc-advice-chip">Moderate — 22% reduction achievable via Solar PPA</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CRUD Action Checklist -->
+  <section id="reduction-tasks" class="cc-section">
+    <div class="cc-container">
+      <div class="cc-sec-header">
+        <h2>Carbon Reduction CRUD Action Checklist</h2>
+        <p>Create, read, update, and delete sustainability actions stored in a live JavaScript task array.</p>
+      </div>
+
+      <div class="cc-crud-box">
+        <div class="cc-input-bar">
+          <input
+            type="text"
+            id="newTaskBox"
+            placeholder="Enter a carbon reduction action (e.g., Audit facility HVAC schedule)..."
+            aria-label="New carbon reduction task"
+          />
+          <button type="button" class="cc-btn cc-btn-rose" onclick="addTask()">Add Task</button>
+        </div>
+
+        <div class="cc-crud-status">
+          <span id="crudCountLabel">0 tasks tracked</span>
+          <button type="button" class="cc-link-action" onclick="restoreDefaultTasks()">Reset Sample Tasks</button>
+        </div>
+
+        <ul id="taskUlHost" class="cc-task-ul"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Minimum Underpinning Theory -->
+  <section id="component-theory" class="cc-section cc-tinted-bg">
+    <div class="cc-container">
+      <div class="cc-sec-header">
+        <h2>Minimum Underpinning Theory: Interactive DOM Components</h2>
+        <p>Event-driven programming, Document Object Model (DOM) updates, and responsive UI design.</p>
+      </div>
+
+      <div class="cc-theory-panel">
+        <p>
+          Developing an interactive component for a web application relies on <strong>event-driven programming</strong>,
+          <strong>DOM manipulation</strong>, and user-centered interface design. User actions—such as clicking an
+          answer option, moving range sliders, or adding and editing reduction tasks—trigger JavaScript event handlers
+          that dynamically update progress bars, score readouts, and DOM elements in real time without reloading the page.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="cc-footer">
+    <div class="cc-container cc-footer-wrap">
+      <span><strong>CARBONCUT</strong> &mdash; Carbon Footprint Tracking &amp; Reduction Services</span>
+      <span>&copy; 2026 CARBONCUT &bull; GitHub &amp; Vercel Ready</span>
+    </div>
+  </footer>
+
+  <script src="carboncut_assessment_logic.js"></script>
+</body>
+</html>
